@@ -466,7 +466,7 @@ df %&gt;%
 
 ---
 
-## Boxplots - remove 'extreme outliers'? 
+## Boxplots - remove extreme outliers? 
 
 `x` is considered an 'extreme outlier' if it is more than 3*IQR away from the mean 
 
@@ -486,7 +486,7 @@ remove_outliers &lt;- function(df, var){
 
 ---
 
-## Boxplots - remove 'extreme outliers'? 
+## Boxplots - remove extreme outliers? 
 
 
 ```r
@@ -500,7 +500,11 @@ df %&gt;%
 ![](final_files/figure-html/unnamed-chunk-14-1.png)&lt;!-- --&gt;
 ---
 
-## Boxplots - remove 'moderate outliers'? 
+
+## Boxplots - remove moderate outliers? 
+
+`x` is considered an 'extreme outlier' if it is more than 3*IQR away from the mean 
+
 
 ```r
 remove_outliers &lt;- function(df, var, threshold){
@@ -516,7 +520,7 @@ remove_outliers &lt;- function(df, var, threshold){
 ```
 ---
 
-## Boxplots - remove 'extreme outliers'? 
+## Boxplots - remove moderate outliers? 
 
 ```r
 df %&gt;% 
@@ -547,7 +551,7 @@ df %&gt;%
 ```r
 df %&gt;% 
   ggplot() + 
-  geom_histogram(aes(x = price), binwidth = 2)
+* geom_histogram(aes(x = price), binwidth = 2)
 ```
 
 ![](final_files/figure-html/unnamed-chunk-18-1.png)&lt;!-- --&gt;
@@ -674,7 +678,8 @@ df %&gt;%
 
 ---
 
-## Two variables
+## Two variables  - both are continuous
+
 
 ```r
 p1 &lt;- df %&gt;% 
@@ -744,6 +749,200 @@ gridExtra::grid.arrange(p1, p2, p3, p4, nrow = 2)
 ```
 
 ![](final_files/figure-html/unnamed-chunk-32-1.png)&lt;!-- --&gt;
+
+---
+## Outcome vs continuous variables
+
+![](final_files/figure-html/unnamed-chunk-33-1.png)&lt;!-- --&gt;
+
+---
+
+## Correlations
+
+![](final_files/figure-html/unnamed-chunk-34-1.png)&lt;!-- --&gt;
+
+---
+## Continuous vs Discrete - grouping
+
+
+```r
+df %&gt;% 
+  remove_outliers(price,3) %&gt;% 
+  ggplot() + 
+  geom_density(aes(x = price, group = area_type, colour = area_type))
+```
+
+![](final_files/figure-html/unnamed-chunk-35-1.png)&lt;!-- --&gt;
+
+---
+## Continuous vs Discrete - faceting
+
+
+```r
+df %&gt;% 
+  remove_outliers(price,3) %&gt;% 
+  ggplot() + 
+  geom_density(aes(x = price)) +
+  facet_wrap(vars(area_type))
+```
+
+![](final_files/figure-html/unnamed-chunk-36-1.png)&lt;!-- --&gt;
+
+---
+## Continuous vs Discrete - grouped boxplots
+
+
+```r
+df %&gt;% 
+  remove_outliers(price,3) %&gt;% 
+  ggplot() + 
+  geom_boxplot(aes(x = area_type, y = price))
+```
+
+![](final_files/figure-html/unnamed-chunk-37-1.png)&lt;!-- --&gt;
+
+---
+
+# Continuous vs Discrete - grouped summary statistics
+
+
+```r
+df %&gt;% 
+  group_by(location) %&gt;% 
+  summarize(average_price = mean(price),
+            median_price = median(price)) %&gt;% 
+  arrange(-average_price) %&gt;% 
+  top_n(5)
+```
+
+```
+## # A tibble: 5 x 3
+##   location       average_price median_price
+##   &lt;chr&gt;                  &lt;dbl&gt;        &lt;dbl&gt;
+## 1 Cubbon Road            1900          1900
+## 2 Ashok Nagar            1486          1486
+## 3 Yemlur                 1093.         1675
+## 4 Church Street          1068          1068
+## 5 D Souza Layout         1015          1015
+```
+
+---
+# Continuous vs Discrete - grouped summary statistics
+
+
+```r
+df %&gt;% 
+  group_by(area_type) %&gt;% 
+  summarize(average_price = mean(price),
+            median_price = median(price)) %&gt;% 
+  arrange(-average_price) %&gt;% 
+  top_n(5)
+```
+
+```
+## # A tibble: 4 x 3
+##   area_type            average_price median_price
+##   &lt;chr&gt;                        &lt;dbl&gt;        &lt;dbl&gt;
+## 1 Plot  Area                   208.           140
+## 2 Built-up  Area               104.            70
+## 3 Super built-up  Area          93.0           65
+## 4 Carpet  Area                  89.5           70
+```
+
+---
+# Continuous vs cut variable
+
+
+```r
+df %&gt;% 
+  ggplot() + 
+  geom_boxplot(aes(x = bedroom_cat, y = price))
+```
+
+![](final_files/figure-html/unnamed-chunk-40-1.png)&lt;!-- --&gt;
+
+---
+# What have we learned? 
+
+--
+* There are probably too many societies to meaningfully model 
+
+
+--
+* Houses with `plot_area` are generally more expensive that the other categories of `area_type`
+
+
+--
+* Prices are more variable in homes with more bedrooms
+
+
+--
+* Larger houses are more expensive overall
+
+
+--
+* Number of bedrooms is highly correlated with the number of bathrooms
+
+
+---
+# What questions do we have?
+
+--
+* Can location be reclassified?
+
+
+--
+* Are houses that are not in societies different from those that are in? Missing not at random?
+
+
+--
+* How are location, size, and price related to each other?
+
+--
+* What's the deal with `availability`?
+
+--
+
+---
+# Remember
+
+--
+* YOU are your audience
+
+
+--
+* You are exploring, not explaining 
+
+
+--
+* If it needs to be done more than once, write a function 
+
+
+--
+* Resist the urge to hard code 
+
+
+--
+* Don't spend time making your graphs pretty
+
+
+--
+* Start developing a body of functions that you typically use 
+
+
+---
+# Thank you so much!
+
+You can find me at 
+
+
+@SushGopalan on Twitter
+
+
+sushmitavgopalan16 on Github
+
+
+www.sushmitagopalan.com
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
